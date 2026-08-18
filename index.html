@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#eef9f8">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="84일 체크인">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="의민의 12주 다이어트 체크인 — 체중, 식사, 물, 운동을 가볍게 기록하세요.">
+  <title>84일 체크인 · 의민</title>
+  <style>
+    :root {
+      --ink: #16364a;
+      --muted: #69818f;
+      --blue: #2e76e8;
+      --blue-2: #5b9aff;
+      --mint: #35c7ae;
+      --mint-soft: #ddf8f2;
+      --sky-soft: #eaf3ff;
+      --white: #ffffff;
+      --line: #dcebed;
+      --bg: #f2f9f8;
+      --shadow: 0 12px 34px rgba(39, 93, 112, .10);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 90% 2%, rgba(73, 206, 183, .20), transparent 24rem),
+        linear-gradient(180deg, #f5fbff 0%, var(--bg) 42%, #f8fbfb 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      padding-bottom: calc(98px + env(safe-area-inset-bottom));
+    }
+
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 3px solid rgba(46, 118, 232, .25);
+      outline-offset: 2px;
+    }
+
+    .app { width: min(100%, 560px); margin: 0 auto; padding: 0 16px 32px; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(18px + env(safe-area-inset-top)) 2px 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 850; letter-spacing: -.3px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px;
+      background: linear-gradient(145deg, var(--blue), var(--mint)); color: white;
+      box-shadow: 0 8px 18px rgba(46, 118, 232, .22); font-size: 19px;
+    }
+    .date-pill { font-size: 12px; color: var(--muted); background: rgba(255,255,255,.78); padding: 7px 10px; border: 1px solid rgba(220,235,237,.9); border-radius: 999px; }
+
+    .page[hidden] { display: none; }
+    .hero {
+      position: relative; overflow: hidden; padding: 23px; border-radius: 30px;
+      color: white; background: linear-gradient(135deg, #2a70dc 0%, #458ee9 50%, #34bea9 120%);
+      box-shadow: 0 18px 45px rgba(44, 112, 193, .22);
+    }
+    .hero::after {
+      content: ""; position: absolute; right: -38px; top: -55px; width: 170px; height: 170px;
+      border-radius: 50%; border: 34px solid rgba(255,255,255,.09);
+    }
+    .hero-top { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .eyebrow { margin: 0 0 3px; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; opacity: .77; text-transform: uppercase; }
+    .day-title { margin: 0; font-size: clamp(30px, 9vw, 42px); letter-spacing: -1.8px; line-height: 1.08; }
+    .streak { flex: 0 0 auto; padding: 9px 12px; border: 1px solid rgba(255,255,255,.24); background: rgba(255,255,255,.13); border-radius: 16px; font-size: 13px; font-weight: 750; backdrop-filter: blur(8px); }
+    .hero-status { position: relative; z-index: 1; margin: 17px 0 11px; display: flex; justify-content: space-between; align-items: end; gap: 12px; }
+    .hero-status strong { font-size: 13px; }
+    .hero-status span { font-size: 12px; opacity: .8; }
+    .progress-track { position: relative; z-index: 1; height: 10px; background: rgba(255,255,255,.23); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0; border-radius: inherit; background: white; transition: width .7s cubic-bezier(.2,.8,.2,1); }
+    .progress-labels { position: relative; z-index: 1; display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; font-weight: 700; opacity: .85; }
+
+    .next-action {
+      display: flex; align-items: center; gap: 12px; margin: 14px 0 10px; padding: 15px 17px;
+      border: 1px solid #cfe9e6; border-radius: 20px; background: rgba(255,255,255,.88); box-shadow: 0 7px 22px rgba(50,100,110,.07);
+    }
+    .next-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px; background: var(--mint-soft); font-size: 21px; }
+    .next-action p { margin: 0; }
+    .next-action .small { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .4px; }
+    .next-action .message { font-weight: 800; letter-spacing: -.2px; }
+
+    .timeline { display: flex; gap: 8px; overflow-x: auto; padding: 5px 2px 12px; scrollbar-width: none; }
+    .timeline::-webkit-scrollbar { display: none; }
+    .time-chip {
+      position: relative; flex: 0 0 auto; border: 1px solid var(--line); background: rgba(255,255,255,.9);
+      border-radius: 999px; padding: 9px 13px; font-size: 12px; font-weight: 750; cursor: pointer;
+    }
+    .time-chip.is-current { border-color: var(--blue-2); color: var(--blue); background: var(--sky-soft); }
+    .time-chip.is-done { color: #178873; border-color: #a9e5da; background: var(--mint-soft); }
+    .time-chip.is-current::after { content: ""; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--blue); top: -2px; right: 7px; }
+
+    .section-card { margin-top: 12px; padding: 19px; border: 1px solid rgba(220,235,237,.92); border-radius: var(--radius); background: rgba(255,255,255,.91); box-shadow: var(--shadow); scroll-margin-top: 12px; }
+    .section-card.is-current { border-color: rgba(46,118,232,.32); box-shadow: 0 12px 34px rgba(46,118,232,.11); }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .card-title { display: flex; align-items: center; gap: 9px; }
+    .card-title h2 { margin: 0; font-size: 18px; letter-spacing: -.5px; }
+    .card-title span { font-size: 20px; }
+    .slot-toggle { border: 0; border-radius: 999px; padding: 8px 11px; background: #edf3f4; color: var(--muted); font-size: 11px; font-weight: 800; cursor: pointer; }
+    .slot-toggle.active { background: var(--mint-soft); color: #158a74; }
+    .field-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .weight-row { display: flex; gap: 9px; margin-bottom: 16px; }
+    .weight-box { position: relative; flex: 1; }
+    .weight-box input { width: 100%; height: 50px; padding: 0 47px 0 15px; border: 1px solid var(--line); border-radius: 15px; color: var(--ink); background: #fbfdfd; font-size: 19px; font-weight: 800; appearance: none; }
+    .weight-box span { position: absolute; right: 15px; top: 14px; color: var(--muted); font-weight: 700; }
+    .primary-btn { min-width: 72px; border: 0; border-radius: 15px; padding: 0 16px; color: white; background: var(--blue); font-weight: 800; cursor: pointer; }
+
+    .choice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+    .choice-btn {
+      min-height: 46px; border: 1px solid var(--line); border-radius: 15px; padding: 10px;
+      background: #fbfdfd; font-size: 13px; font-weight: 750; cursor: pointer; transition: transform .15s, border-color .15s, background .15s;
+    }
+    .choice-btn:active { transform: scale(.97); }
+    .choice-btn.active { border-color: #8bdaca; color: #137d69; background: var(--mint-soft); }
+    .detail-wrap { margin-top: 10px; }
+    .detail-wrap input { width: 100%; border: 1px solid transparent; border-radius: 13px; padding: 11px 12px; color: var(--ink); background: #f3f7f7; font-size: 13px; }
+    .detail-wrap input:focus { background: white; border-color: #bcdfe7; }
+
+    .water-row { display: flex; gap: 11px; }
+    .water-drop {
+      display: grid; place-items: center; width: 52px; height: 56px; border: 1px solid #cae2ee; border-radius: 18px;
+      background: #f4faff; font-size: 24px; filter: grayscale(.75); opacity: .58; cursor: pointer; transition: transform .18s, opacity .18s, filter .18s, background .18s;
+    }
+    .water-drop:active { transform: scale(.88); }
+    .water-drop.active { filter: none; opacity: 1; background: #dff4ff; border-color: #8ccbed; transform: translateY(-2px); }
+    .water-note { margin: 10px 0 0; color: var(--muted); font-size: 12px; }
+    .water-note.complete { color: #16866f; font-weight: 800; }
+
+    .exercise-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .exercise-btn {
+      min-height: 91px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px;
+      border: 1px solid var(--line); border-radius: 19px; background: #fbfdfd; font-weight: 800; cursor: pointer;
+      transition: transform .2s, box-shadow .2s, background .2s;
+    }
+    .exercise-btn:nth-child(4), .exercise-btn:nth-child(5) { grid-column: span 1; }
+    .exercise-btn .emoji { font-size: 27px; line-height: 1; }
+    .exercise-btn.active { color: #166c9d; border-color: #9fd4ef; background: linear-gradient(145deg,#e7f5ff,#e2faf5); box-shadow: 0 8px 20px rgba(60,148,190,.13); }
+    .exercise-btn.pop { animation: pop .45s ease; }
+    @keyframes pop { 0%{transform:scale(1)} 38%{transform:scale(1.12) rotate(-2deg)} 72%{transform:scale(.97)} 100%{transform:scale(1)} }
+
+    .bedtime-copy { margin: 0 0 13px; color: var(--muted); font-size: 13px; }
+    .day-done-btn { width: 100%; border: 0; border-radius: 17px; padding: 15px; color: white; background: linear-gradient(115deg,var(--blue),var(--mint)); font-weight: 850; cursor: pointer; box-shadow: 0 9px 22px rgba(45,132,164,.17); }
+    .day-done-btn.active { background: var(--mint-soft); color: #147b68; box-shadow: none; }
+
+    .page-header { padding: 10px 2px 15px; }
+    .page-header h1 { margin: 0 0 4px; font-size: 29px; letter-spacing: -1.1px; }
+    .page-header p { margin: 0; color: var(--muted); }
+    .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin-bottom: 13px; }
+    .stat-card { padding: 15px 11px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.9); text-align: center; }
+    .stat-card span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; }
+    .stat-card strong { display: block; margin-top: 4px; font-size: 18px; }
+
+    .checkpoint-card { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: white; box-shadow: var(--shadow); }
+    .checkpoint-card h2 { margin: 0 0 16px; font-size: 17px; }
+    .checkpoint-list { display: grid; gap: 10px; }
+    .checkpoint { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: #f5f8f8; }
+    .checkpoint .badge { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 13px; background: white; font-size: 18px; }
+    .checkpoint strong { display:block; font-size:13px; }
+    .checkpoint small { color:var(--muted); }
+    .checkpoint.cleared { background: var(--mint-soft); color: #126f5d; }
+    .checkpoint.cleared .badge { background:#bceee4; }
+
+    .calendar-card, .chart-card, .history-detail { margin-bottom: 13px; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.94); box-shadow: var(--shadow); }
+    .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .calendar-nav strong { font-size: 17px; }
+    .calendar-nav button { display:grid; place-items:center; width:36px; height:36px; border:1px solid var(--line); border-radius:12px; background:white; cursor:pointer; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; text-align: center; }
+    .weekday { padding: 2px 0 6px; color: var(--muted); font-size: 10px; font-weight: 800; }
+    .calendar-day { position:relative; aspect-ratio:1; display:grid; place-items:center; border:0; border-radius:12px; background:transparent; font-size:12px; cursor:pointer; }
+    .calendar-day.out-project { color:#bac6ca; }
+    .calendar-day.recorded { color:#117663; background:var(--mint-soft); font-weight:850; }
+    .calendar-day.today { box-shadow: inset 0 0 0 2px var(--blue); color:var(--blue); font-weight:850; }
+    .calendar-day.selected { color:white; background:var(--blue); }
+    .calendar-day.empty { cursor:default; }
+    .calendar-legend { display:flex; gap:14px; margin-top:12px; color:var(--muted); font-size:11px; }
+    .legend-dot { display:inline-block; width:9px; height:9px; border-radius:4px; margin-right:5px; background:var(--mint-soft); border:1px solid #9adfce; }
+    .legend-dot.today-dot { background:white; border:2px solid var(--blue); }
+    .history-detail h2 { margin:0 0 10px; font-size:16px; }
+    .empty-copy { margin: 0; padding: 17px 8px; color: var(--muted); text-align: center; font-size: 13px; }
+    .record-summary { display:flex; flex-wrap:wrap; gap:7px; }
+    .summary-chip { padding:7px 10px; border-radius:999px; color:#32606c; background:#eef5f6; font-size:11px; font-weight:750; }
+
+    .chart-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .chart-head h2 { margin:0; font-size:17px; }
+    .chart-head p { margin:3px 0 0; color:var(--muted); font-size:11px; }
+    .chart-legend { display:flex; flex-direction:column; gap:5px; color:var(--muted); font-size:10px; white-space:nowrap; }
+    .line-key::before { content:""; display:inline-block; width:14px; height:3px; margin-right:5px; border-radius:2px; vertical-align:middle; background:var(--blue); }
+    .line-key.avg::before { background:var(--mint); }
+    .chart-wrap { position:relative; height:250px; }
+    #weightChart { width:100%; height:250px; display:block; }
+    .chart-empty { position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); text-align:center; font-size:13px; }
+    .recent-list { display:grid; gap:8px; }
+    .recent-row { display:flex; justify-content:space-between; align-items:center; padding:11px 12px; border-radius:14px; background:#f4f8f8; font-size:12px; }
+    .recent-row strong { font-size:14px; }
+
+    .bottom-nav {
+      position: fixed; left: 50%; bottom: 0; z-index: 20; transform: translateX(-50%); width: min(100%, 560px);
+      display: grid; grid-template-columns: repeat(3,1fr); padding: 9px 18px calc(9px + env(safe-area-inset-bottom));
+      border-top: 1px solid rgba(215,230,232,.9); background: rgba(250,253,253,.91); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .nav-btn { display:flex; flex-direction:column; align-items:center; gap:2px; border:0; background:transparent; color:#81939b; padding:5px; font-size:10px; font-weight:800; cursor:pointer; }
+    .nav-btn .nav-icon { font-size:21px; filter:grayscale(.65); }
+    .nav-btn.active { color:var(--blue); }
+    .nav-btn.active .nav-icon { filter:none; transform:translateY(-1px); }
+
+    .toast { position:fixed; left:50%; bottom:calc(91px + env(safe-area-inset-bottom)); z-index:50; width:max-content; max-width:calc(100% - 32px); transform:translate(-50%,20px); padding:12px 17px; border-radius:16px; color:white; background:#173c51; box-shadow:0 12px 35px rgba(16,43,58,.24); font-size:13px; font-weight:800; opacity:0; pointer-events:none; transition:opacity .2s, transform .25s; text-align:center; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .storage-warning { display:none; margin:0 0 10px; padding:10px 12px; border-radius:13px; color:#825f1c; background:#fff5d7; font-size:11px; }
+
+    @media (min-width: 520px) { body { font-size:16px; } .app { padding-left:20px; padding-right:20px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✓</span><span>84일 체크인</span></div>
+      <div class="date-pill" id="todayLabel"></div>
+    </header>
+    <p class="storage-warning" id="storageWarning">이 브라우저에서는 기록 저장이 제한될 수 있어요.</p>
+
+    <section class="page" id="todayPage" data-page="today">
+      <div class="hero">
+        <div class="hero-top">
+          <div><p class="eyebrow">12 WEEK PROJECT</p><h1 class="day-title" id="dayTitle">DAY 1 / 84</h1></div>
+          <div class="streak" id="streakBadge">🔥 0일 연속</div>
+        </div>
+        <div class="hero-status"><strong>START 91kg → GOAL 79kg</strong><span id="progressText">첫 체중을 기록해요</span></div>
+        <div class="progress-track" aria-label="목표 진행률"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-labels"><span>91</span><span>87</span><span>83</span><span>79kg</span></div>
+      </div>
+
+      <div class="next-action">
+        <div class="next-icon" id="nextIcon" aria-hidden="true">💧</div>
+        <div><p class="small">지금 할 것</p><p class="message" id="nextMessage">물 한 잔으로 가볍게 시작해요</p></div>
+      </div>
+
+      <div class="timeline" id="timeline" aria-label="오늘 시간대"></div>
+
+      <article class="section-card" id="slot-breakfast" data-slot-card="breakfast">
+        <div class="card-head"><div class="card-title"><span>🌅</span><h2>아침</h2></div><button class="slot-toggle" data-slot="breakfast">완료</button></div>
+        <label class="field-label" for="weightInput">오늘 공복 체중</label>
+        <div class="weight-row"><div class="weight-box"><input id="weightInput" type="number" inputmode="decimal" min="40" max="200" step="0.1" placeholder="예: 90.4"><span>kg</span></div><button class="primary-btn" id="saveWeight">저장</button></div>
+        <span class="field-label">아침은 어떻게 먹었나요?</span>
+        <div class="choice-grid" data-meal="breakfast">
+          <button class="choice-btn" data-value="든든하게">🍳 든든하게</button><button class="choice-btn" data-value="가볍게">🥣 가볍게</button>
+          <button class="choice-btn" data-value="쉐이크">🥤 쉐이크</button><button class="choice-btn" data-value="안 먹음">➖ 안 먹음</button>
+        </div>
+        <div class="detail-wrap"><input data-detail="breakfast" maxlength="80" placeholder="메모는 선택사항 · 예: 계란 2개"></div>
+      </article>
+
+      <article class="section-card" id="slot-morning" data-slot-card="morning">
+        <div class="card-head"><div class="card-title"><span>☀️</span><h2>오전</h2></div><button class="slot-toggle" data-slot="morning">완료</button></div>
+        <span class="field-label">오전 물 · 3잔</span><div class="water-row" data-water="am"></div><p class="water-note" data-water-note="am"></p>
+      </article>
+
+      <article class="section-card" id="slot-lunch" data-slot-card="lunch">
+        <div class="card-head"><div class="card-title"><span>🍚</span><h2>점심</h2></div><button class="slot-toggle" data-slot="lunch">완료</button></div>
+        <div class="choice-grid" data-meal="lunch">
+          <button class="choice-btn" data-value="균형식">🥢 균형식</button><button class="choice-btn" data-value="단백질 중심">🥩 단백질 중심</button>
+          <button class="choice-btn" data-value="외식">🍜 외식</button><button class="choice-btn" data-value="간단히">🥪 간단히</button>
+        </div>
+        <div class="detail-wrap"><input data-detail="lunch" maxlength="80" placeholder="메모는 선택사항"></div>
+      </article>
+
+      <article class="section-card" id="slot-afternoon" data-slot-card="afternoon">
+        <div class="card-head"><div class="card-title"><span>🌤️</span><h2>오후</h2></div><button class="slot-toggle" data-slot="afternoon">완료</button></div>
+        <span class="field-label">간식</span>
+        <div class="choice-grid" data-meal="snack">
+          <button class="choice-btn" data-value="계획 간식">🥣 계획 간식</button><button class="choice-btn" data-value="그냥 간식">🍪 그냥 간식</button>
+          <button class="choice-btn" data-value="안 먹음">➖ 안 먹음</button><button class="choice-btn" data-value="과일">🍎 과일</button>
+        </div>
+        <div class="detail-wrap"><input data-detail="snack" maxlength="80" placeholder="메모는 선택사항"></div>
+        <span class="field-label" style="margin-top:16px">오후 물 · 3잔</span><div class="water-row" data-water="pm"></div><p class="water-note" data-water-note="pm"></p>
+      </article>
+
+      <article class="section-card" id="slot-evening" data-slot-card="evening">
+        <div class="card-head"><div class="card-title"><span>🌙</span><h2>저녁</h2></div><button class="slot-toggle" data-slot="evening">완료</button></div>
+        <span class="field-label">저녁 식사</span>
+        <div class="choice-grid" data-meal="dinner">
+          <button class="choice-btn" data-value="일반식">🍽️ 일반식</button><button class="choice-btn" data-value="가벼운 저녁">🥤 가벼운 저녁</button>
+          <button class="choice-btn" data-value="단백질 중심">🥗 단백질 중심</button><button class="choice-btn" data-value="외식">🍔 외식</button>
+        </div>
+        <div class="detail-wrap"><input data-detail="dinner" maxlength="80" placeholder="메모는 선택사항"></div>
+        <span class="field-label" style="margin-top:16px">오늘 움직임 · 여러 개 선택 가능</span>
+        <div class="exercise-grid" id="exerciseGrid">
+          <button class="exercise-btn" data-exercise="운동"><span class="emoji">🏋️</span><span>운동</span></button>
+          <button class="exercise-btn" data-exercise="런닝"><span class="emoji">🏃</span><span>런닝</span></button>
+          <button class="exercise-btn" data-exercise="풋살"><span class="emoji">⚽</span><span>풋살</span></button>
+          <button class="exercise-btn" data-exercise="걷기"><span class="emoji">🚶</span><span>걷기</span></button>
+          <button class="exercise-btn" data-exercise="회복"><span class="emoji">🧘</span><span>회복</span></button>
+        </div>
+        <span class="field-label" style="margin-top:16px">저녁 물 · 2잔</span><div class="water-row" data-water="eve"></div><p class="water-note" data-water-note="eve"></p>
+      </article>
+
+      <article class="section-card" id="slot-bedtime" data-slot-card="bedtime">
+        <div class="card-head"><div class="card-title"><span>🌌</span><h2>자기 전</h2></div><button class="slot-toggle" data-slot="bedtime">완료</button></div>
+        <p class="bedtime-copy">완벽하지 않아도 기록하면 충분해요. 오늘의 나에게 체크 하나 남기기.</p>
+        <button class="day-done-btn" id="dayDone">오늘도 잘 보냈어요 ✓</button>
+      </article>
+
+      <section style="margin-top:14px">
+        <div class="checkpoint-card"><h2>🏁 나의 체크포인트</h2><div class="checkpoint-list" id="checkpointList"></div></div>
+      </section>
+    </section>
+
+    <section class="page" id="recordsPage" data-page="records" hidden>
+      <div class="page-header"><h1>기록</h1><p>한 칸씩 채운 84일의 흔적이에요.</p></div>
+      <div class="stats-grid"><div class="stat-card"><span>기록한 날</span><strong id="recordedDays">0일</strong></div><div class="stat-card"><span>현재 연속</span><strong id="recordStreak">0일</strong></div><div class="stat-card"><span>물 체크</span><strong id="waterTotal">0잔</strong></div></div>
+      <div class="calendar-card">
+        <div class="calendar-nav"><button id="prevMonth" aria-label="이전 달">‹</button><strong id="calendarMonth"></strong><button id="nextMonth" aria-label="다음 달">›</button></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-legend"><span><i class="legend-dot"></i>기록한 날</span><span><i class="legend-dot today-dot"></i>오늘</span></div>
+      </div>
+      <div class="history-detail"><h2 id="historyTitle">날짜를 선택하세요</h2><div id="historyBody"><p class="empty-copy">달력에서 날짜를 누르면 간단한 기록을 볼 수 있어요.</p></div></div>
+    </section>
+
+    <section class="page" id="trendsPage" data-page="trends" hidden>
+      <div class="page-header"><h1>변화</h1><p>하루 숫자보다 천천히 내려가는 흐름을 봐요.</p></div>
+      <div class="stats-grid"><div class="stat-card"><span>최근 체중</span><strong id="latestWeight">—</strong></div><div class="stat-card"><span>START 대비</span><strong id="weightDelta">—</strong></div><div class="stat-card"><span>7일 평균</span><strong id="sevenAverage">—</strong></div></div>
+      <div class="chart-card">
+        <div class="chart-head"><div><h2>체중 추이</h2><p>파랑은 체중, 민트는 7일 이동평균</p></div><div class="chart-legend"><span class="line-key">체중</span><span class="line-key avg">7일 평균</span></div></div>
+        <div class="chart-wrap"><canvas id="weightChart" aria-label="체중 변화 차트"></canvas><div class="chart-empty" id="chartEmpty">공복 체중을 기록하면<br>여기에 변화가 보여요.</div></div>
+      </div>
+      <div class="history-detail"><h2>최근 기록</h2><div class="recent-list" id="recentWeights"><p class="empty-copy">아직 체중 기록이 없어요.</p></div></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="주요 메뉴">
+    <button class="nav-btn active" data-target="today"><span class="nav-icon">☀️</span><span>오늘</span></button>
+    <button class="nav-btn" data-target="records"><span class="nav-icon">▦</span><span>기록</span></button>
+    <button class="nav-btn" data-target="trends"><span class="nav-icon">↗</span><span>변화</span></button>
+  </nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+      const START_WEIGHT = 91;
+      const GOAL_WEIGHT = 79;
+      const PROJECT_DAYS = 84;
+      const START_DATE = new Date(2026, 7, 19);
+      const STORAGE_KEY = 'uimin-84day-checkin-v1';
+      const slots = [
+        ['breakfast','아침','🌅'], ['morning','오전','☀️'], ['lunch','점심','🍚'],
+        ['afternoon','오후','🌤️'], ['evening','저녁','🌙'], ['bedtime','자기 전','🌌']
+      ];
+      const waterGoals = { am: 3, pm: 3, eve: 2 };
+      const praises = {
+        '운동': '🔥 오늘도 해냈다! 근육이 조용히 박수 치는 중.',
+        '런닝': '🏃 한 걸음마다 목표에 가까워지고 있어요!',
+        '풋살': '⚽ 오늘 유산소는 이미 충분한데?! 멋져요.',
+        '걷기': '🚶 가볍게라도 움직인 오늘, 아주 잘했어요.',
+        '회복': '🧘 쉬는 것도 훈련이에요. 오래 가는 선택!'
+      };
+
+      const el = id => document.getElementById(id);
+      const today = atNoon(new Date());
+      const todayKey = toKey(today);
+      let state = loadState();
+      let calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1);
+      let selectedCalendarKey = '';
+      let toastTimer;
+
+      function atNoon(date) { return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12); }
+      function toKey(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth()+1).padStart(2,'0');
+        const d = String(date.getDate()).padStart(2,'0');
+        return `${y}-${m}-${d}`;
+      }
+      function fromKey(key) { const [y,m,d] = key.split('-').map(Number); return new Date(y,m-1,d,12); }
+      function diffDays(a,b) { return Math.round((atNoon(a)-atNoon(b))/86400000); }
+      function formatDate(date, options={}) { return new Intl.DateTimeFormat('ko-KR', options).format(date); }
+      function defaultRecord() {
+        return { weight:'', slots:{}, water:{am:[],pm:[],eve:[]}, exercise:[], meals:{}, details:{}, updatedAt:'' };
+      }
+      function normalizeRecord(raw={}) {
+        const base = defaultRecord();
+        return {
+          ...base, ...raw,
+          slots: {...base.slots, ...(raw.slots||{})},
+          water: {...base.water, ...(raw.water||{})},
+          exercise: Array.isArray(raw.exercise) ? raw.exercise : [],
+          meals: {...base.meals, ...(raw.meals||{})}, details: {...base.details, ...(raw.details||{})}
+        };
+      }
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          return { version:1, records: saved.records && typeof saved.records === 'object' ? saved.records : {} };
+        } catch (e) {
+          setTimeout(()=>el('storageWarning').style.display='block',0);
+          return {version:1,records:{}};
+        }
+      }
+      function saveState() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+        catch (e) { el('storageWarning').style.display='block'; }
+      }
+      function getTodayRecord() { return normalizeRecord(state.records[todayKey]); }
+      function updateToday(mutator) {
+        const record = getTodayRecord();
+        mutator(record); record.updatedAt = new Date().toISOString();
+        state.records[todayKey] = record; saveState(); renderAll();
+      }
+      function isMeaningful(raw) {
+        if (!raw) return false; const r=normalizeRecord(raw);
+        return Boolean(r.weight || Object.values(r.slots).some(Boolean) || Object.values(r.meals).some(Boolean) ||
+          r.exercise.length || Object.values(r.details).some(v=>String(v).trim()) || Object.values(r.water).some(a=>a.some(Boolean)));
+      }
+      function currentSlot() {
+        const h = new Date().getHours();
+        if (h < 9) return 'breakfast'; if (h < 12) return 'morning'; if (h < 14) return 'lunch';
+        if (h < 18) return 'afternoon'; if (h < 22) return 'evening'; return 'bedtime';
+      }
+      function streakCount() {
+        let cursor = atNoon(today); let count=0;
+        if (!isMeaningful(state.records[toKey(cursor)])) cursor.setDate(cursor.getDate()-1);
+        while (isMeaningful(state.records[toKey(cursor)])) { count++; cursor.setDate(cursor.getDate()-1); }
+        return count;
+      }
+      function showToast(message) {
+        const toast=el('toast'); toast.textContent=message; toast.classList.add('show');
+        clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'),2600);
+      }
+
+      function renderHeader() {
+        el('todayLabel').textContent = formatDate(today,{month:'long',day:'numeric',weekday:'short'});
+        const d = diffDays(today,START_DATE);
+        if (d < 0) el('dayTitle').textContent = `D-${Math.abs(d)}`;
+        else if (d < PROJECT_DAYS) el('dayTitle').textContent = `DAY ${d+1} / 84`;
+        else el('dayTitle').textContent = 'DAY 84 / 84';
+        const streak=streakCount(); el('streakBadge').textContent=`🔥 ${streak}일 연속`;
+      }
+
+      function renderProgress() {
+        const r=getTodayRecord(); const weight=parseFloat(r.weight);
+        const progress=Number.isFinite(weight) ? Math.max(0,Math.min(100,(START_WEIGHT-weight)/(START_WEIGHT-GOAL_WEIGHT)*100)) : 0;
+        el('progressFill').style.width=`${progress}%`;
+        el('progressText').textContent=Number.isFinite(weight) ? `${Math.max(0,weight-GOAL_WEIGHT).toFixed(1)}kg 남음 · ${Math.round(progress)}%` : '첫 체중을 기록해요';
+        const checkpoints=[['1차 체크포인트',87,'🏁'],['2차 체크포인트',83,'🏁'],['최종 목표',79,'🏆']];
+        el('checkpointList').innerHTML=checkpoints.map(([name,target,icon])=>{
+          const cleared=Number.isFinite(weight)&&weight<=target;
+          return `<div class="checkpoint ${cleared?'cleared':''}"><span class="badge">${cleared?'✓':icon}</span><div><strong>${name} · ${target}kg</strong><small>${cleared?'CLEAR! 정말 잘하고 있어요':Number.isFinite(weight)?`${Math.max(0,weight-target).toFixed(1)}kg 남음`:'체중을 기록하면 진행돼요'}</small></div></div>`;
+        }).join('');
+      }
+
+      function renderTimeline() {
+        const r=getTodayRecord(); const now=currentSlot();
+        el('timeline').innerHTML=slots.map(([key,label,icon])=>`<button class="time-chip ${key===now?'is-current':''} ${r.slots[key]?'is-done':''}" data-scroll-slot="${key}">${icon} ${label}${r.slots[key]?' ✓':''}</button>`).join('');
+        document.querySelectorAll('[data-slot-card]').forEach(card=>card.classList.toggle('is-current',card.dataset.slotCard===now));
+        document.querySelectorAll('[data-slot]').forEach(btn=>{
+          const on=Boolean(r.slots[btn.dataset.slot]); btn.classList.toggle('active',on); btn.textContent=on?'완료 ✓':'완료';
+        });
+      }
+
+      function renderNextAction() {
+        const r=getTodayRecord(); const now=currentSlot(); let icon='✓', message='지금 시간대 체크인을 가볍게 남겨요';
+        if (now==='breakfast' && !r.weight) [icon,message]=['⚖️','공복 체중을 한 번 기록해볼까요?'];
+        else if (now==='morning' && r.water.am.filter(Boolean).length<3) [icon,message]=['💧','오전 물 한 잔, 지금 딱 좋아요'];
+        else if (now==='lunch' && !r.meals.lunch) [icon,message]=['🍚','점심은 버튼 하나로 기록하면 끝!'];
+        else if (now==='afternoon' && r.water.pm.filter(Boolean).length<3) [icon,message]=['💧','오후 물 한 잔으로 리듬을 이어가요'];
+        else if (now==='evening' && !r.meals.dinner) [icon,message]=['🌙','저녁과 오늘의 움직임을 체크해요'];
+        else if (now==='bedtime' && !r.slots.bedtime) [icon,message]=['🌌','오늘도 잘 보냈다고 체크해 주세요'];
+        else [icon,message]=['✨','이미 잘하고 있어요. 부담 없이 이어가요'];
+        el('nextIcon').textContent=icon; el('nextMessage').textContent=message;
+      }
+
+      function renderTodayControls() {
+        const r=getTodayRecord();
+        if (document.activeElement!==el('weightInput')) el('weightInput').value=r.weight;
+        document.querySelectorAll('[data-meal]').forEach(group=>group.querySelectorAll('[data-value]').forEach(btn=>btn.classList.toggle('active',r.meals[group.dataset.meal]===btn.dataset.value)));
+        document.querySelectorAll('[data-detail]').forEach(input=>{ if(document.activeElement!==input) input.value=r.details[input.dataset.detail]||''; });
+        Object.entries(waterGoals).forEach(([period,goal])=>{
+          const row=document.querySelector(`[data-water="${period}"]`); const values=r.water[period]||[];
+          row.innerHTML=Array.from({length:goal},(_,i)=>`<button class="water-drop ${values[i]?'active':''}" data-water-period="${period}" data-water-index="${i}" aria-label="${period} 물 ${i+1}잔 ${values[i]?'완료':'미완료'}">💧</button>`).join('');
+          const count=values.filter(Boolean).length; const note=document.querySelector(`[data-water-note="${period}"]`);
+          note.textContent=count===goal?'물 목표 완료! 잘하고 있어요 👏':`${count} / ${goal}잔 · 마실 때 하나씩 눌러요`; note.classList.toggle('complete',count===goal);
+        });
+        document.querySelectorAll('[data-exercise]').forEach(btn=>btn.classList.toggle('active',r.exercise.includes(btn.dataset.exercise)));
+        el('dayDone').classList.toggle('active',Boolean(r.slots.bedtime)); el('dayDone').textContent=r.slots.bedtime?'오늘 체크 완료! 잘했어요 ✓':'오늘도 잘 보냈어요 ✓';
+      }
+
+      function renderRecords() {
+        const records=Object.entries(state.records).filter(([,r])=>isMeaningful(r));
+        el('recordedDays').textContent=`${records.length}일`; el('recordStreak').textContent=`${streakCount()}일`;
+        const water=records.reduce((sum,[,raw])=>sum+Object.values(normalizeRecord(raw).water).flat().filter(Boolean).length,0); el('waterTotal').textContent=`${water}잔`;
+        renderCalendar(); if(selectedCalendarKey) renderHistory(selectedCalendarKey);
+      }
+      function renderCalendar() {
+        const y=calendarCursor.getFullYear(), m=calendarCursor.getMonth();
+        el('calendarMonth').textContent=`${y}년 ${m+1}월`;
+        const grid=el('calendarGrid'); const weekdays=['일','월','화','수','목','금','토']; let html=weekdays.map(d=>`<div class="weekday">${d}</div>`).join('');
+        const first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate();
+        for(let i=0;i<first;i++) html+='<div class="calendar-day empty"></div>';
+        const projectEnd=new Date(START_DATE); projectEnd.setDate(projectEnd.getDate()+PROJECT_DAYS-1);
+        for(let d=1;d<=last;d++) { const date=new Date(y,m,d,12), key=toKey(date); const recorded=isMeaningful(state.records[key]); const inProject=date>=START_DATE&&date<=projectEnd;
+          html+=`<button class="calendar-day ${recorded?'recorded':''} ${key===todayKey?'today':''} ${key===selectedCalendarKey?'selected':''} ${inProject?'':'out-project'}" data-calendar-date="${key}">${d}</button>`; }
+        grid.innerHTML=html;
+      }
+      function renderHistory(key) {
+        const date=fromKey(key), raw=state.records[key]; el('historyTitle').textContent=formatDate(date,{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+        if(!isMeaningful(raw)) { el('historyBody').innerHTML='<p class="empty-copy">이날은 아직 기록이 없어요.</p>'; return; }
+        const r=normalizeRecord(raw); const chips=[];
+        if(r.weight) chips.push(`⚖️ ${Number(r.weight).toFixed(1)}kg`);
+        Object.entries(r.meals).forEach(([k,v])=>{if(v) chips.push(`${({breakfast:'아침',lunch:'점심',snack:'간식',dinner:'저녁'})[k]} · ${v}`)});
+        r.exercise.forEach(v=>chips.push(`${({운동:'🏋️',런닝:'🏃',풋살:'⚽',걷기:'🚶',회복:'🧘'})[v]||'✓'} ${v}`));
+        const water=Object.values(r.water).flat().filter(Boolean).length; if(water) chips.push(`💧 물 ${water}잔`);
+        const done=Object.values(r.slots).filter(Boolean).length; if(done) chips.push(`✓ 시간대 ${done}/6`);
+        el('historyBody').innerHTML=`<div class="record-summary">${chips.map(c=>`<span class="summary-chip">${escapeHtml(c)}</span>`).join('')}</div>`;
+      }
+
+      function weightEntries() {
+        return Object.entries(state.records).map(([key,raw])=>[key,parseFloat(normalizeRecord(raw).weight)]).filter(([,w])=>Number.isFinite(w)).sort((a,b)=>a[0].localeCompare(b[0]));
+      }
+      function movingAverages(entries) {
+        return entries.map(([key])=>{ const end=fromKey(key), start=new Date(end); start.setDate(start.getDate()-6); const vals=entries.filter(([k])=>{const d=fromKey(k);return d>=start&&d<=end}).map(([,w])=>w); return vals.reduce((a,b)=>a+b,0)/vals.length; });
+      }
+      function renderTrends() {
+        const entries=weightEntries(), latest=entries.at(-1), avgs=movingAverages(entries), lastAvg=avgs.at(-1);
+        el('latestWeight').textContent=latest?`${latest[1].toFixed(1)}kg`:'—';
+        el('weightDelta').textContent=latest?`${latest[1]-START_WEIGHT>0?'+':''}${(latest[1]-START_WEIGHT).toFixed(1)}kg`:'—';
+        el('sevenAverage').textContent=Number.isFinite(lastAvg)?`${lastAvg.toFixed(1)}kg`:'—';
+        el('recentWeights').innerHTML=entries.length?entries.slice(-7).reverse().map(([key,w])=>`<div class="recent-row"><span>${formatDate(fromKey(key),{month:'short',day:'numeric',weekday:'short'})}</span><strong>${w.toFixed(1)} kg</strong></div>`).join(''):'<p class="empty-copy">아직 체중 기록이 없어요.</p>';
+        el('chartEmpty').style.display=entries.length?'none':'grid'; drawChart(entries,avgs);
+      }
+      function drawChart(entries,avgs) {
+        const canvas=el('weightChart'), ctx=canvas.getContext('2d'), rect=canvas.getBoundingClientRect(), dpr=Math.min(window.devicePixelRatio||1,2);
+        canvas.width=Math.max(1,Math.round(rect.width*dpr)); canvas.height=Math.max(1,Math.round(rect.height*dpr)); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,rect.width,rect.height); if(!entries.length)return;
+        const W=rect.width,H=rect.height,p={l:34,r:12,t:18,b:30}; const vals=entries.map(e=>e[1]).concat(avgs); let min=Math.min(...vals), max=Math.max(...vals); if(max-min<1){min-=.6;max+=.6}else{min-=.4;max+=.4}
+        const x=i=>entries.length===1?(p.l+W-p.r)/2:p.l+i*(W-p.l-p.r)/(entries.length-1); const y=v=>p.t+(max-v)*(H-p.t-p.b)/(max-min);
+        ctx.font='10px -apple-system, sans-serif'; ctx.fillStyle='#80939b'; ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.strokeStyle='#e3eeee'; ctx.lineWidth=1;
+        for(let i=0;i<4;i++){const yy=p.t+i*(H-p.t-p.b)/3,val=max-i*(max-min)/3;ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(W-p.r,yy);ctx.stroke();ctx.fillText(val.toFixed(1),p.l-6,yy)}
+        const line=(values,color,width,dash=[])=>{ctx.beginPath();values.forEach((v,i)=>{const xx=x(i),yy=y(v);i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash(dash);ctx.stroke();ctx.setLineDash([])};
+        line(entries.map(e=>e[1]),'#2e76e8',2.4); line(avgs,'#35c7ae',3.2);
+        entries.forEach(([,v],i)=>{ctx.beginPath();ctx.arc(x(i),y(v),3.7,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();ctx.strokeStyle='#2e76e8';ctx.lineWidth=2;ctx.stroke()});
+        ctx.fillStyle='#80939b';ctx.textAlign='center';ctx.textBaseline='top'; const labelIdx=entries.length===1?[0]:[0,entries.length-1]; labelIdx.forEach(i=>ctx.fillText(formatDate(fromKey(entries[i][0]),{month:'numeric',day:'numeric'}),x(i),H-p.b+9));
+      }
+      function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
+      function renderAll() { renderHeader();renderProgress();renderTimeline();renderNextAction();renderTodayControls();renderRecords();renderTrends(); }
+
+      function bindEvents() {
+        document.addEventListener('click',e=>{
+          const nav=e.target.closest('[data-target]'); if(nav){
+            const target=nav.dataset.target; document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b===nav)); document.querySelectorAll('[data-page]').forEach(p=>p.hidden=p.dataset.page!==target);
+            window.scrollTo({top:0,behavior:'smooth'}); if(target==='trends')requestAnimationFrame(renderTrends); return;
+          }
+          const scroll=e.target.closest('[data-scroll-slot]'); if(scroll){el(`slot-${scroll.dataset.scrollSlot}`).scrollIntoView({behavior:'smooth',block:'start'});return;}
+          const slot=e.target.closest('[data-slot]'); if(slot){updateToday(r=>r.slots[slot.dataset.slot]=!r.slots[slot.dataset.slot]);showToast('✓ 시간대 체크 완료!');return;}
+          const choice=e.target.closest('[data-meal] [data-value]'); if(choice){const meal=choice.closest('[data-meal]').dataset.meal;updateToday(r=>r.meals[meal]=r.meals[meal]===choice.dataset.value?'':choice.dataset.value);showToast('🍽️ 식사 기록 완료. 이 정도면 충분해요!');return;}
+          const drop=e.target.closest('[data-water-period]'); if(drop){const p=drop.dataset.waterPeriod,i=Number(drop.dataset.waterIndex);updateToday(r=>{const a=Array.from({length:waterGoals[p]},(_,n)=>Boolean((r.water[p]||[])[n]));a[i]=!a[i];r.water[p]=a}); const now=getTodayRecord().water[p].filter(Boolean).length;showToast(now===waterGoals[p]?'💦 이 시간대 물 목표 완료!':'💧 물 한 잔 추가! 잘하고 있어요.');return;}
+          const ex=e.target.closest('[data-exercise]'); if(ex){const name=ex.dataset.exercise;let added=false;updateToday(r=>{const i=r.exercise.indexOf(name);if(i>=0)r.exercise.splice(i,1);else{r.exercise.push(name);added=true}});if(added){ex.classList.add('pop');setTimeout(()=>ex.classList.remove('pop'),500);showToast(praises[name])}return;}
+          const day=e.target.closest('[data-calendar-date]'); if(day){selectedCalendarKey=day.dataset.calendarDate;renderCalendar();renderHistory(selectedCalendarKey);return;}
+        });
+        el('saveWeight').addEventListener('click',saveWeight);
+        el('weightInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveWeight();e.target.blur();}});
+        document.querySelectorAll('[data-detail]').forEach(input=>input.addEventListener('change',()=>updateToday(r=>r.details[input.dataset.detail]=input.value.trim())));
+        el('dayDone').addEventListener('click',()=>{updateToday(r=>r.slots.bedtime=!r.slots.bedtime);showToast('🌟 오늘 기록 완료. 내일도 가볍게 만나요!');});
+        el('prevMonth').addEventListener('click',()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()-1,1);renderCalendar();});
+        el('nextMonth').addEventListener('click',()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+1,1);renderCalendar();});
+        let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(!el('trendsPage').hidden)renderTrends()},120)});
+      }
+      function saveWeight(){const value=parseFloat(el('weightInput').value);if(!Number.isFinite(value)||value<40||value>200){showToast('40~200kg 사이의 체중을 입력해 주세요.');return}updateToday(r=>r.weight=value.toFixed(1));showToast('⚖️ 체중 저장 완료. 숫자보다 흐름을 봐요!');}
+
+      bindEvents(); renderAll();
+    })();
+  </script>
+</body>
+</html>
